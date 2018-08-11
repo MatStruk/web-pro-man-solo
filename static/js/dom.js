@@ -1,20 +1,50 @@
 // It uses data_handler.js to visualize elements
 let dom = {
-    loadBoards: function() {
+    loadBoards: function(optionalArgument) {
+        console.log(optionalArgument)
+        if (typeof optionalArgument === 'undefined') {
+            optionalArgument = 0;
+        }
         // retrieves boards and makes showBoards called
-        dom.showBoards(dataHandler.getBoards());
+        dom.showBoards(dataHandler.getBoards(), optionalArgument);
     },
-    showBoards: function(boards) {
+    showBoards: function(boards, boardLength) {
         // shows boards appending them to #boards div
         // it adds necessary event listeners also
-        for (var index = 0; index < boards.length; index++) {
-            console.log(boards[index])
-            const board = document.createElement("div");
-            board.id = "index" + index
-            board.classList.add("board")
-            document.querySelector("#boards").appendChild(board)
-            document.getElementById("index" + index).innerHTML += boards[index].title
+        for (var index = boardLength; index < boards.length; index++) {
+            let board = document.createElement("div");
+            board.id = "index" + index;
+            board.classList.add("board");
+            document.querySelector("#boards").appendChild(board);
+            currentBoard = document.getElementById("index" + index)
+            currentBoard.innerHTML += boards[index].title;
+            currentBoard.addEventListener("click", function() { console.log(currentBoard) });
         }
+
+    },
+    addBoardsButton: function() {
+        let input = document.createElement("input");
+        input.id = "nameBoard"
+        input.setAttribute("placeholder", "Write name of a board and press enter")
+        input.setAttribute("onkeydown","dom.setNameOfBoard(this)")
+        input.setAttribute("type", "text")
+
+        let button = document.createElement("button");
+        button.id = "addBoardsButton";
+        document.querySelector("#boards").appendChild(button);
+        addBoardsButton = document.getElementById("addBoardsButton")
+        addBoardsButton.innerHTML += "Create new board";
+        addBoardsButton.addEventListener("click", function () {document.querySelector("#boards").insertBefore(input, addBoardsButton)});
+    },
+    replaceElementWithInput: function(element) {
+        console.log("will be continued")
+    },
+    setNameOfBoard: function(name) {
+        if(event.keyCode == 13) {
+                dataHandler.createNewBoard(name.value);
+                document.getElementById("nameBoard").value = " ";
+                document.querySelector("#nameBoard").remove();
+            }
 
     },
     loadCards: function(boardId) {
