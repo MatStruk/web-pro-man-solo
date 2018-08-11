@@ -36,9 +36,6 @@ let dom = {
         addBoardsButton.innerHTML += "Create new board";
         addBoardsButton.addEventListener("click", function () {document.querySelector("#boards").insertBefore(input, addBoardsButton)});
     },
-    replaceElementWithInput: function(element) {
-        console.log("will be continued")
-    },
     setNameOfBoard: function(name) {
         if(event.keyCode == 13) {
                 dataHandler.createNewBoard(name.value);
