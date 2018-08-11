@@ -9,16 +9,19 @@ let dataHandler = {
     _loadData: function() {
         // it is not called from outside
         // loads data from local storage, parses it and put into this._data property
+        dataHandler._data = JSON.parse(localStorage.getItem(dataHandler.keyInLocalStorage));
     },
     _saveData: function() {
         // it is not called from outside
         // saves the data from this._data to local storage
+        localStorage.setItem(dataHandler.keyInLocalStorage, JSON.stringify(dataHandler._data));
     },
     init: function() {
         this._loadData();
     },
     getBoards: function(callback) {
         // the boards are retrieved and then the callback function is called with the boards
+        return dataHandler._data.boards
     },
     getBoard: function(boardId, callback) {
         // the board is retrieved and then the callback function is called with the board
