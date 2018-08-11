@@ -1,7 +1,6 @@
 // It uses data_handler.js to visualize elements
 let dom = {
     loadBoards: function(optionalArgument) {
-        console.log(optionalArgument)
         if (typeof optionalArgument === 'undefined') {
             optionalArgument = 0;
         }
@@ -15,10 +14,12 @@ let dom = {
             let board = document.createElement("div");
             board.id = "index" + index;
             board.classList.add("board");
+            onClick="reply_click(this.id)"
             document.querySelector("#boards").appendChild(board);
             currentBoard = document.getElementById("index" + index)
             currentBoard.innerHTML += boards[index].title;
-            currentBoard.addEventListener("click", function() { console.log(currentBoard) });
+            currentBoard.addEventListener("click", function() {
+                dom.loadCards(this.id)});
         }
 
     },
@@ -46,6 +47,7 @@ let dom = {
     },
     loadCards: function(boardId) {
         // retrieves cards and makes showCards called
+        console.log(boardId)
     },
     showCards: function(cards) {
         // shows the cards of a board
