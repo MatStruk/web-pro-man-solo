@@ -9,16 +9,20 @@ let dataHandler = {
     _loadData: function() {
         // it is not called from outside
         // loads data from local storage, parses it and put into this._data property
+        dataHandler._data = JSON.parse(localStorage.getItem(dataHandler.keyInLocalStorage));
     },
     _saveData: function() {
         // it is not called from outside
         // saves the data from this._data to local storage
+        localStorage.setItem(dataHandler.keyInLocalStorage, JSON.stringify(dataHandler._data));
     },
     init: function() {
         this._loadData();
+        dom.addBoardsButton();
     },
     getBoards: function(callback) {
         // the boards are retrieved and then the callback function is called with the boards
+        return dataHandler._data.boards
     },
     getBoard: function(boardId, callback) {
         // the board is retrieved and then the callback function is called with the board
@@ -37,6 +41,13 @@ let dataHandler = {
     },
     createNewBoard: function(boardTitle, callback) {
         // creates new board, saves it and calls the callback function with its data
+        dataHandler._data.boards.push({
+            id: dataHandler._data.boards.length,
+            title: boardTitle,
+            is_active: true
+        });
+        dataHandler._saveData();
+        dom.loadBoards(dataHandler._data.boards.length - 1);
     },
     createNewCard: function(cardTitle, boardId, statusId, callback) {
         // creates new card, saves it and calls the callback function with its data
