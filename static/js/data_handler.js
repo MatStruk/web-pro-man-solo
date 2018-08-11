@@ -35,6 +35,13 @@ let dataHandler = {
     },
     getCardsByBoardId: function(boardId, callback) {
         // the cards are retrieved and then the callback function is called with the cards
+        cards = []
+        for (var index = 0; index < dataHandler._data.cards.length; index++) {
+            if (dataHandler._data.cards[index].board_id == boardId) {
+                cards.push(dataHandler._data.cards[index])
+            }
+        }
+        return cards
     },
     getCard: function(cardId, callback) {
         // the card is retrieved and then the callback function is called with the card
