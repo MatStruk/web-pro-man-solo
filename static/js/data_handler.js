@@ -18,6 +18,7 @@ let dataHandler = {
     },
     init: function() {
         this._loadData();
+        dom.addBoardsButton();
     },
     getBoards: function(callback) {
         // the boards are retrieved and then the callback function is called with the boards
@@ -40,6 +41,13 @@ let dataHandler = {
     },
     createNewBoard: function(boardTitle, callback) {
         // creates new board, saves it and calls the callback function with its data
+        dataHandler._data.boards.push({
+            id: dataHandler._data.boards.length,
+            title: boardTitle,
+            is_active: true
+        });
+        dataHandler._saveData();
+        dom.loadBoards(dataHandler._data.boards.length - 1);
     },
     createNewCard: function(cardTitle, boardId, statusId, callback) {
         // creates new card, saves it and calls the callback function with its data
