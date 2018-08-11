@@ -2,10 +2,20 @@
 let dom = {
     loadBoards: function() {
         // retrieves boards and makes showBoards called
+        dom.showBoards(dataHandler.getBoards());
     },
     showBoards: function(boards) {
         // shows boards appending them to #boards div
         // it adds necessary event listeners also
+        for (var index = 0; index < boards.length; index++) {
+            console.log(boards[index])
+            const board = document.createElement("div");
+            board.id = "index" + index
+            board.classList.add("board")
+            document.querySelector("#boards").appendChild(board)
+            document.getElementById("index" + index).innerHTML += boards[index].title
+        }
+
     },
     loadCards: function(boardId) {
         // retrieves cards and makes showCards called
