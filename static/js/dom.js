@@ -17,10 +17,10 @@ let dom = {
             onClick="reply_click(this.id)"
             document.querySelector("#boards").appendChild(board);
             currentBoard = document.getElementById("board" + index)
-            currentBoard.innerHTML += boards[index].title;
+            currentBoard.innerHTML += boards[index].title
             currentBoard.addEventListener("click", function() {
-                var idConvertedToBoardId = this.id.replace('board', '')
-                dom.loadCards(parseInt(idConvertedToBoardId) + 1)});
+                let idConvertedToBoardId = this.id.replace('board', '')
+                });
             dom.expandBoardArrowButton(index);
         }
 
@@ -47,43 +47,98 @@ let dom = {
             }
 
     },
+    setNameOfCard: function(name, boardId) {
+        if(event.keyCode == 13) {
+                dataHandler.createNewCard(name.value, boardId +1, 1)
+                document.getElementById("nameCard" + boardId).value = " ";
+                document.querySelector("#nameCard" + boardId).remove();
+            }
+
+    },
     expandBoardArrowButton: function(boardId) {
+        extendBoard = true
         let arrow = document.createElement("img");
         arrow.id = "addBoardsButton" + boardId;
         arrow.setAttribute("src", "http://farm8.staticflickr.com/7418/8726310854_069f2fd220_o.jpg");
         arrow.className = "arrow-down";
         document.querySelector("#board" + boardId).appendChild(arrow);
+        document.getElementById("addBoardsButton" + boardId).addEventListener("click", function() {
+            if (arrow.className === "arrow-down") {
+                arrow.className = "arrow-up";
+                extendBoard = true
+            }
+            else if (arrow.className === "arrow-up") {
+                arrow.className = "arrow-down";
+                extendBoard = false
+            }
+            dom.showPredefinedColumns(boardId, extendBoard);
+        });
 
     },
-    loadCards: function(boardId) {
-        // retrieves cards and makes showCards called
-        console.log(boardId)
-        dom.showCards(dataHandler.getCardsByBoardId(boardId))
+    showPredefinedColumns: function (boardId) {
+        if (extendBoard === true) {
+            dom.addNewCardButton(boardId);
+            let fourColumns = document.createElement("div");
+            fourColumns.classList.add("fourColumns");
+            fourColumns.setAttribute("id", "fourColumns" + boardId)
+            document.querySelector("#board" + boardId).appendChild(fourColumns);
+
+            columnsArray = ["newColumn", "inProgressColumn", "testingColumn", "doneColumn"]
+            for (var i = 0; i < columnsArray.length; i++ ) {
+                    let name = columnsArray[i];
+                    let element = document.createElement("div");
+                    element.className = "column"
+                    element.setAttribute("id", "board" + boardId + name)
+                    element.innerHTML += '<div class="title">' + name + '</div><hr>';
+                    document.querySelector("#fourColumns" + boardId).appendChild(element);
+                }
+            dom.loadCards(parseInt(boardId) + 1)
+        }
+        else if (extendBoard === false) {
+            document.querySelector("#fourColumns" + boardId).innerHTML = "";
+            document.getElementById("fourColumns" + boardId).outerHTML = "";
+            document.getElementById("board" + boardId + "addNewCardButton").outerHTML = "";
+        }
     },
-    showCards: function(cards) {
+    loadCards: function(boardId, optionalArgument) {
+        // retrieves cards and makes showCards called
+        if (typeof optionalArgument === 'undefined') {
+            optionalArgument = 0;
+        }
+        dom.showCards(dataHandler.getCardsByBoardId(boardId), optionalArgument);
+    },
+    showCards: function(cards, cardsLength) {
+        cards = dom.sortCardsByOrder(cards)
+        statuses = {
+            1: "newColumn",
+            2: "inProgressColumn",
+            3: "testingColumn",
+            4: "doneColumn"
+        }
         // shows the cards of a board
         // it adds necessary event listeners also
-        for (var index = 0; index < cards.length; index++) {
-            console.log(cards[index].title)
-            console.log(cards[index].status_id)
-            console.log(cards[index].order)
-            console.log("board id" + cards[index].board_id)
+        for (var index = cardsLength; index < cards.length; index++) {
+            card = document.createElement("div");
+            card.id = cards[index].title;
+            card.className = "card"
+            card.innerHTML += cards[index].title;
+            document.querySelector("#board" + (cards[index].board_id -1) + statuses[cards[index].status_id]).appendChild(card);
         }
     },
-    appendToElement: function(elementToExtend, textToAppend, prepend = false) {
-        // function to append new DOM elements (represented by a string) to an existing DOM element
-        let fakeDiv = document.createElement('div');
-        fakeDiv.innerHTML = textToAppend.trim();
+    sortCardsByOrder: function(cards) {
+    },
+    addNewCardButton: function(boardId) {
+        let input = document.createElement("input");
+        input.id = "nameCard" + boardId
+        input.setAttribute("placeholder", "Write name of a card and press enter");
+        input.setAttribute("onkeydown",'dom.setNameOfCard(this,' + boardId + ')');
+        input.setAttribute("type", "text");
 
-        for (childNode of fakeDiv.childNodes) {
-            if (prepend) {
-                elementToExtend.prependChild(childNode);
-            } else {
-                elementToExtend.appendChild(childNode);
-            }
-        }
-
-        return elementToExtend.lastChild;
+        addNewCard = document.createElement("button");
+        addNewCard.id = "board" + boardId + "addNewCardButton";
+        addNewCard.innerHTML += "Add new card";
+        document.querySelector("#board" + boardId).appendChild(addNewCard);
+        addNewCard.addEventListener("click", function () {document.querySelector("#board" + boardId).insertBefore(input, addNewCard)});
     }
     // here comes more features
 }
