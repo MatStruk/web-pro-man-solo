@@ -108,7 +108,6 @@ let dom = {
         dom.showCards(dataHandler.getCardsByBoardId(boardId), optionalArgument);
     },
     showCards: function(cards, cardsLength) {
-        cards = dom.sortCardsByOrder(cards)
         statuses = {
             1: "newColumn",
             2: "inProgressColumn",
