@@ -35,14 +35,22 @@ let dataHandler = {
     },
     getCardsByBoardId: function(boardId, callback) {
         // the cards are retrieved and then the callback function is called with the cards
+        cards = []
+        for (var index = 0; index < dataHandler._data.cards.length; index++) {
+            if (dataHandler._data.cards[index].board_id === boardId) {
+                cards.push(dataHandler._data.cards[index])
+            }
+        }
+        return cards
     },
     getCard: function(cardId, callback) {
         // the card is retrieved and then the callback function is called with the card
+        return dataHandler._data.cards
     },
     createNewBoard: function(boardTitle, callback) {
         // creates new board, saves it and calls the callback function with its data
         dataHandler._data.boards.push({
-            id: dataHandler._data.boards.length,
+            id: dataHandler._data.boards.length +1,
             title: boardTitle,
             is_active: true
         });
@@ -51,6 +59,15 @@ let dataHandler = {
     },
     createNewCard: function(cardTitle, boardId, statusId, callback) {
         // creates new card, saves it and calls the callback function with its data
+        dataHandler._data.cards.push({
+            id: dataHandler._data.cards.length +1,
+            title: cardTitle,
+            board_id: boardId,
+            status_id: statusId,
+            order: 1
+        });
+        dataHandler._saveData();
+        dom.loadCards(boardId, dataHandler.getCardsByBoardId(boardId).length - 1);
     }
     // here comes more features
 };
