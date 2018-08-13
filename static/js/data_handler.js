@@ -68,6 +68,10 @@ let dataHandler = {
         });
         dataHandler._saveData();
         dom.loadCards(boardId, dataHandler.getCardsByBoardId(boardId).length - 1);
+    },
+    overwriteNameOfCard: function(name, cardId) {
+        dataHandler._data.cards[cardId].title = name
+        dataHandler._saveData();
     }
     // here comes more features
 };

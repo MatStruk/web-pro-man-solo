@@ -41,18 +41,30 @@ let dom = {
     },
     setNameOfBoard: function(name) {
         if(event.keyCode == 13) {
-                dataHandler.createNewBoard(name.value);
-                document.getElementById("nameBoard").value = " ";
-                document.querySelector("#nameBoard").remove();
-            }
+            dataHandler.createNewBoard(name.value);
+            document.getElementById("nameBoard").value = " ";
+            document.querySelector("#nameBoard").remove();
+        }
 
     },
     setNameOfCard: function(name, boardId) {
         if(event.keyCode == 13) {
-                dataHandler.createNewCard(name.value, boardId +1, 1)
-                document.getElementById("nameCard" + boardId).value = " ";
-                document.querySelector("#nameCard" + boardId).remove();
-            }
+            dataHandler.createNewCard(name.value, boardId +1, 1);
+            document.querySelector("#nameCard" + boardId).remove();
+        }
+
+    },
+    changeNameOfCard: function(name, cardId) {
+        if(event.keyCode == 13) {
+            console.log()
+            dataHandler.overwriteNameOfCard(name.value, cardId -1);
+            document.querySelector("#inputCard" + cardId).outerHTML += '<div class="card-title" id="cardtitle' + cardId + '">' + name.value + '<img class="edit-icon" src="https://www.ibidinfo.com/img/22/clean-icon.png"></div>';
+            document.querySelector("#inputCard" + cardId).remove();
+            document.querySelector("#cardtitle"+cardId).addEventListener("click", function() {
+                this.id = this.id.replace('cardtitle', '')
+                this.outerHTML = '<input id="inputCard' + this.id +'" placeholder="' + this.innerText +'" class="change-card-name" onkeydown="dom.changeNameOfCard(this,' + this.id + ')" type="text">'
+            });
+        }
 
     },
     expandBoardArrowButton: function(boardId) {
@@ -108,7 +120,6 @@ let dom = {
         dom.showCards(dataHandler.getCardsByBoardId(boardId), optionalArgument);
     },
     showCards: function(cards, cardsLength) {
-        cards = dom.sortCardsByOrder(cards)
         statuses = {
             1: "newColumn",
             2: "inProgressColumn",
@@ -118,12 +129,17 @@ let dom = {
         // shows the cards of a board
         // it adds necessary event listeners also
         for (var index = cardsLength; index < cards.length; index++) {
+            cardTitle = cards[index].title.replace(/\s/g, '') // better validation would be needed
             card = document.createElement("div");
-            card.id = cards[index].title;
-            card.className = "card"
-            card.innerHTML += cards[index].title;
+            card.id = "card" + cards[index].id;
+            card.className = "card";
+            card.innerHTML += '<div class="card-title" id="cardtitle'+cards[index].id+'">' + cards[index].title + '<img class="edit-icon" src="https://www.ibidinfo.com/img/22/clean-icon.png"></img></div>';
             document.querySelector("#board" + (cards[index].board_id -1) + statuses[cards[index].status_id]).appendChild(card);
-        }
+            document.querySelector("#cardtitle"+cards[index].id).addEventListener("click", function() {
+                this.id = this.id.replace('cardtitle', '')
+                this.outerHTML = '<input id="inputCard' + this.id +'" placeholder="' + this.innerText +'" class="change-card-name" onkeydown="dom.changeNameOfCard(this,' + this.id + ')" type="text">'
+            });
+        };
     },
     sortCardsByOrder: function(cards) {
     },
@@ -138,7 +154,7 @@ let dom = {
         addNewCard.id = "board" + boardId + "addNewCardButton";
         addNewCard.innerHTML += "Add new card";
         document.querySelector("#board" + boardId).appendChild(addNewCard);
-        addNewCard.addEventListener("click", function () {document.querySelector("#board" + boardId).insertBefore(input, addNewCard)});
+        addNewCard.addEventListener("click", function() {document.querySelector("#board" + boardId).insertBefore(input, addNewCard)});
     }
     // here comes more features
 }
