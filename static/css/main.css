@@ -8,6 +8,15 @@
     display: block;
 }
 
+.arrow-up, .arrow-down, .edit-icon {
+    user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
 .arrow-down {
     float: right;
     display: inline-block
@@ -18,7 +27,7 @@
     transform: rotate(180deg);
 }
 
-.column {
+.column, .droptarget {
     width: 25%;
     margin-top: 15px;
     margin-left: 5px;
@@ -60,4 +69,9 @@
 
 .change-card-name {
     width: 100%;
+}
+
+.card.over {
+  border: 2px dashed #000;
+  border-top: 2px solid blue;
 }
