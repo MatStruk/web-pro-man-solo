@@ -22,7 +22,11 @@ let dataHandler = {
     },
     getBoards: function(callback) {
         // the boards are retrieved and then the callback function is called with the boards
-        return dataHandler._data.boards
+        if (dataHandler._data != null) {
+            return dataHandler._data.boards
+        } else {
+            dataHandler._data = {statuses: null, boards: null, cards: null};
+        }
     },
     getBoard: function(boardId, callback) {
         // the board is retrieved and then the callback function is called with the board
@@ -41,6 +45,9 @@ let dataHandler = {
                 cards.push(dataHandler._data.cards[index])
             }
         }
+        cards.sort(function(a, b) {
+            return (a.order) - (b.order);
+        });
         return cards
     },
     getCard: function(cardId, callback) {
@@ -59,18 +66,52 @@ let dataHandler = {
     },
     createNewCard: function(cardTitle, boardId, statusId, callback) {
         // creates new card, saves it and calls the callback function with its data
-        dataHandler._data.cards.push({
-            id: dataHandler._data.cards.length +1,
-            title: cardTitle,
-            board_id: boardId,
-            status_id: statusId,
-            order: 1
-        });
-        dataHandler._saveData();
-        dom.loadCards(boardId, dataHandler.getCardsByBoardId(boardId).length - 1);
+        if (dataHandler._data != null) {
+            dataHandler._data.cards.push({
+                id: dataHandler._data.cards.length +1,
+                title: cardTitle,
+                board_id: boardId,
+                status_id: statusId,
+                order: dataHandler._data.cards.length +1
+            });
+            dataHandler._saveData();
+            dom.loadCards(boardId, dataHandler.getCardsByBoardId(boardId).length - 1);
+        }
+        else {
+            console.log("error")
+        }
     },
     overwriteNameOfCard: function(name, cardId) {
         dataHandler._data.cards[cardId].title = name
+        dataHandler._saveData();
+    },
+    changedCardStatusAndBoard: function(status, board, card) {
+        for (let index = 0; index < dataHandler._data.cards.length; index ++) {
+            if (dataHandler._data.cards[index].id == card) {
+                if (dataHandler._data.cards[index].board_id != parseInt(board) +1) {
+                    dataHandler._data.cards[index].order = dataHandler.getCardsByBoardId(parseInt(board) +1).length + 1
+                }
+                dataHandler._data.cards[index].board_id = parseInt(board) +1
+                dataHandler._data.cards[index].status_id = parseInt(status)
+                dataHandler._data.cards[index].order = dataHandler._data.cards.length +1
+            }
+        };
+        dataHandler._saveData();
+    },
+    updateCardsOrder: function(cardId, newOrder, updatedStatus, cardToUpdateStatus, boardId) {
+        cardId -= 1 // Card1 has index of 0
+        if (typeof dataHandler._data.cards[cardId] != 'undefined') {
+            if (dataHandler._data.cards[cardId].id == cardToUpdateStatus) {
+                if (typeof updatedStatus != 'undefined' || updatedStatus != 'null') {
+                    dataHandler._data.cards[cardToUpdateStatus].status_id = updatedStatus;
+                    //dataHandler._data.cards[cardToUpdateStatus].order = newOrder;
+                    dataHandler._data.cards[cardToUpdateStatus].board_id = boardId +1;
+                };
+            };
+            dataHandler._data.cards[cardId].order = newOrder;
+        } else {
+            console.log("Wrong cardId");
+        };
         dataHandler._saveData();
     }
     // here comes more features
