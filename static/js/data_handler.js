@@ -25,7 +25,7 @@ let dataHandler = {
         if (dataHandler._data != null) {
             return dataHandler._data.boards
         } else {
-            dataHandler._data = {statuses: null, boards: null, cards: null};
+            dataHandler._data = {statuses: Array(0), boards: Array(0), cards: Array(0)};
         }
     },
     getBoard: function(boardId, callback) {
