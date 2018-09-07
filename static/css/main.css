@@ -73,5 +73,5 @@
 
 .card.over {
   border: 2px dashed #000;
-  border-top: 2px solid blue;
+  border-top: 2px solid red;
 }

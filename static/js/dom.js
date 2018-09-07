@@ -37,7 +37,9 @@ let dom = {
         document.querySelector("#boards").appendChild(button);
         addBoardsButton = document.getElementById("addBoardsButton")
         addBoardsButton.innerHTML += "Create new board";
-        addBoardsButton.addEventListener("click", function () {document.querySelector("#boards").insertBefore(input, addBoardsButton)});
+        addBoardsButton.addEventListener("click", function () {
+            document.querySelector("#boards").insertBefore(input, addBoardsButton)
+        });
     },
     setNameOfBoard: function(name) {
         if(event.keyCode == 13 || event.keyCode == 27) {
@@ -150,9 +152,10 @@ let dom = {
             });
         };
         var allCards = document.querySelectorAll('.card');
-        allCards.forEach(function(element) {dom.addToCardsEvents(element);})
+        allCards.forEach(dom.addToCardsEvents)
     },
     addToCardsEvents: function(card) {
+        console.log(card)
         card.addEventListener('dragstart', function(event) {dom.handleDragStart(event, card)});
         card.addEventListener('dragenter', function(event) {dom.handleDragEnter(card)})
         card.addEventListener('dragover',  function(event) {dom.handleDragOver(event, card)});
