@@ -28,7 +28,7 @@ DROP TABLE IF EXISTS public.boards;
 CREATE TABLE boards (
   id              SERIAL PRIMARY KEY,
   title           VARCHAR(50),
-  is_active  BOOLEAN
+  userid integer
 );
 
 
