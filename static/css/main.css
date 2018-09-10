@@ -8,13 +8,20 @@
     display: block;
 }
 
-.arrow-up, .arrow-down, .edit-icon {
+.arrow-up, .arrow-down, .edit-icon, .deleteButton, .delete-card {
     user-drag: none;
     user-select: none;
     -moz-user-select: none;
     -webkit-user-drag: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+}
+
+.deleteButton {
+    width: 20px;
+    height: 20px;
+    float: right;
+    margin-right: 20px;
 }
 
 .arrow-down {
@@ -47,15 +54,19 @@
 .card {
     background: pink;
     margin: 10px;
-    padding: 15px;
+    min-height: 50px;
+}
+
+.card:hover .delete-card {
+   opacity: 1;
 }
 
 
-.card-title:hover .edit-icon {
+.card-title:hover .edit-icon, .card-title:hover .delete-card {
   opacity:1;
 }
 
-.edit-icon {
+.edit-icon, .delete-card {
   opacity:0;
   height: 15px;
   width: 15px;
@@ -74,4 +85,15 @@
 .card.over {
   border: 2px dashed #000;
   border-top: 2px solid red;
+}
+
+.delete-card {
+    display: inline-block;
+    vertical-align: top;
+    float: right;
+}
+
+.card-title {
+  text-align: center;
+  padding-top: 15px;
 }

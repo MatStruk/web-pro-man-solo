@@ -2,27 +2,29 @@
 let saveSelectedElement = null;
 extendBoard = true
 let dom = {
-    loadBoards: function(optionalArgument) {
-        if (typeof optionalArgument === 'undefined') {
-            optionalArgument = 0;
+    loadBoards: function(dynamicCounter) {
+        if (typeof dynamicCounter === 'undefined') {
+            dynamicCounter = 0;
         }
         // retrieves boards and makes showBoards called
-        dom.showBoards(dataHandler.getBoards(), optionalArgument);
+        //dom.showBoards(dataHandler.getBoards(), optionalArgument);
+        logic.ajax('GET', '/get-boards','', 'dom.showBoards(data,' + dynamicCounter +')')
     },
-    showBoards: function(boards, boardLength) {
+    showBoards: function(boards, dynamicCounter) {
         // shows boards appending them to #boards div
         // it adds necessary event listeners also
         if (boards != undefined) {
-            for (let index = boardLength; index < boards.length; index++) {
+            for (let index = dynamicCounter; index < boards.length; index++) {
                 let board = document.createElement("div");
-                board.id = "board" + index;
+                board.id = "board" + boards[index].id;
                 board.classList.add("board");
                 onClick="reply_click(this.id)"
                 document.querySelector("#boards").appendChild(board);
-                currentBoard = document.getElementById("board" + index)
+                currentBoard = document.getElementById("board" + boards[index].id)
                 currentBoard.innerHTML += boards[index].title
                 currentBoard.addEventListener("click", function() {let idConvertedToBoardId = this.id.replace('board', '')});
-                dom.expandBoardArrowButton(index);
+                dom.expandBoardArrowButton(boards[index].id);
+                dom.deleteBoardButton(boards[index].id)
             }
         }
     },
@@ -44,7 +46,9 @@ let dom = {
     setNameOfBoard: function(name) {
         if(event.keyCode == 13 || event.keyCode == 27) {
             if (event.keyCode == 13) {
-                dataHandler.createNewBoard(name.value);
+                //dataHandler.createNewBoard(name.value);
+                numberOfBoards = document.querySelectorAll('.board').length
+                logic.ajax('POST', '/create-new-board', 'title=' + name.value, 'dom.loadBoards(' + numberOfBoards + ')')
             }
             document.getElementById("nameBoard").value = " ";
             document.querySelector("#nameBoard").remove();
@@ -53,7 +57,10 @@ let dom = {
     setNameOfCard: function(name, boardId) {
          if(event.keyCode == 13 || event.keyCode == 27) {
             if (event.keyCode == 13) {
-                dataHandler.createNewCard(name.value, boardId +1, 1);
+                //dataHandler.createNewCard(name.value, boardId +1, 1);
+                currentBoardLength = document.querySelectorAll('#board' + boardId + ' .card').length
+                console.log(currentBoardLength)
+                logic.ajax('POST', '/create-new-card', 'title=' + name.value + '&boardId=' + (boardId), 'dom.loadCards(' + boardId + ',' + currentBoardLength + ')')
             }
             document.querySelector("#nameCard" + boardId).remove();
         }
@@ -61,10 +68,11 @@ let dom = {
     changeNameOfCard: function(name, cardId) {
          if(event.keyCode == 13 || event.keyCode == 27) {
             if (event.keyCode == 13) {
-                dataHandler.overwriteNameOfCard(name.value, cardId -1);
+                //dataHandler.overwriteNameOfCard(name.value, cardId -1);
+                logic.ajax('POST', '/change-name-of-card', 'title=' + name.value + '&cardId=' + (cardId))
                 document.querySelector("#inputCard" + cardId).outerHTML += '<div class="card-title" id="cardtitle' + cardId + '">' + name.value + '<img class="edit-icon" src="https://www.ibidinfo.com/img/22/clean-icon.png"></div>';
             } else {
-                document.querySelector("#inputCard" + cardId).outerHTML += '<div class="card-title" id="cardtitle' + cardId + '">' + dataHandler._data.cards[cardId -1].title + '<img class="edit-icon" src="https://www.ibidinfo.com/img/22/clean-icon.png"></div>';
+                document.querySelector("#inputCard" + cardId).outerHTML += '<div class="card-title" id="cardtitle' + cardId + '">' + document.querySelector("#inputCard" + cardId).placeholder + '<img class="edit-icon" src="https://www.ibidinfo.com/img/22/clean-icon.png"></div>';
             }
             document.querySelector("#inputCard" + cardId).remove();
             document.querySelector("#cardtitle" + cardId).addEventListener("click", function() {
@@ -80,7 +88,7 @@ let dom = {
         arrow.setAttribute("src", "http://farm8.staticflickr.com/7418/8726310854_069f2fd220_o.jpg");
         arrow.className = "arrow-down";
         document.querySelector("#board" + boardId).appendChild(arrow);
-        document.getElementById("addBoardsButton" + boardId).addEventListener("click", function() {
+        arrow.addEventListener("click", function() {
             if (arrow.className === "arrow-down") {
                 arrow.className = "arrow-up";
                 extendBoard = true
@@ -91,6 +99,21 @@ let dom = {
             }
             dom.showPredefinedColumns(boardId, extendBoard);
         });
+    },
+    deleteBoardButton: function(boardId) {
+        let deleteButton = document.createElement("img");
+        deleteButton.id = "deleteBoardButton" + boardId;
+        deleteButton.setAttribute("src", "http://www.free-icons-download.net/images/recycle-bin-logo-icon-66421.png");
+        deleteButton.className = "deleteButton";
+        document.querySelector("#board" + boardId).appendChild(deleteButton);
+        deleteButton.addEventListener("click", function() {
+            if (confirm('Are you sure you want to delete this board? You won\'t be able to undo this operation.')) {
+                logic.ajax('POST', '/delete-board', 'boardId=' + boardId, 'alert(data)')
+                document.querySelector("#board" + boardId).outerHTML = ""
+            } else {
+                // Do nothing!
+            }
+        })
     },
     statusesArray: function() {
         statuses = {
@@ -120,7 +143,7 @@ let dom = {
                     element.addEventListener("dragover",  function(event) {dom.dragOver(event)});
                     element.addEventListener("drop", function(event) {dom.dropEvent(event, element)});
                 }
-            dom.loadCards(parseInt(boardId) + 1)
+            dom.loadCards(parseInt(boardId))
         }
         else if (extendBoard === false) {
             document.querySelector("#fourColumns" + boardId).innerHTML = "";
@@ -128,24 +151,34 @@ let dom = {
             document.getElementById("board" + boardId + "addNewCardButton").outerHTML = "";
         }
     },
-    loadCards: function(boardId, optionalArgument) {
-        // retrieves cards and makes showCards called
-        if (typeof optionalArgument === 'undefined') {
-            optionalArgument = 0;
+    loadCards: function(boardId, dynamicCounter) {
+        if (typeof dynamicCounter === 'undefined') {
+            dynamicCounter = 0;
         }
-        dom.showCards(dataHandler.getCardsByBoardId(boardId), optionalArgument);
+        // retrieves cards and makes showCards called
+        //dom.showCards(dataHandler.getCardsByBoardId(boardId), optionalArgument);
+        logic.ajax('POST', '/get-cards-by-board', 'boardId=' + boardId, 'dom.showCards(data,' + dynamicCounter +')')
     },
-    showCards: function(cards, cardsLength) {
+    showCards: function(cards, dynamicCounter) {
+        cards = dom.sortCards(cards)
         // shows the cards of a board
         // it adds necessary event listeners also
-        for (let index = cardsLength; index < cards.length; index++) {
+        for (let index = dynamicCounter; index < cards.length; index++) {
             cardTitle = cards[index].title.replace(/\s/g, '')
             card = document.createElement("div");
             card.id = "card" + cards[index].id;
             card.className = "card";
             card.setAttribute("draggable", "true");
-            card.innerHTML += '<div class="card-title" id="cardtitle'+cards[index].id+'">' + cards[index].title + '<img class="edit-icon" src="https://www.ibidinfo.com/img/22/clean-icon.png"></img></div>';
-            document.querySelector("#" + dom.statusesArray()[cards[index].status_id] + "insideboard" + (cards[index].board_id -1)).appendChild(card);
+            card.innerHTML += '<img class="delete-card" id="delete' + cards[index].id + '" src="http://www.free-icons-download.net/images/recycle-bin-logo-icon-66421.png"></img><div class="card-title" id="cardtitle'+cards[index].id+'">' + cards[index].title + '<img class="edit-icon" src="https://www.ibidinfo.com/img/22/clean-icon.png"></img></div>';
+            document.querySelector("#" + dom.statusesArray()[cards[index].status_id] + "insideboard" + (cards[index].board_id)).appendChild(card);
+            document.querySelector('#delete' + cards[index].id).addEventListener("click", function() {
+                if (confirm('Are you sure you want to delete this board? You won\'t be able to undo this operation.')) {
+                    logic.ajax('POST', '/delete-card', 'cardId=' + cards[index].id, 'alert(data)')
+                    document.querySelector("#card" + cards[index].id).outerHTML = ""
+                } else {
+                    // Do nothing!
+                }
+            })
             document.querySelector("#cardtitle"+cards[index].id).addEventListener("click", function() {
                 this.id = this.id.replace('cardtitle', '')
                 this.outerHTML = '<input id="inputCard' + this.id +'" placeholder="' + this.innerText +'" class="change-card-name" onkeydown="dom.changeNameOfCard(this,' + this.id + ')" type="text">'
@@ -154,8 +187,13 @@ let dom = {
         var allCards = document.querySelectorAll('.card');
         allCards.forEach(dom.addToCardsEvents)
     },
+    sortCards: function(cards) {
+        cards.sort(function(a, b) {
+            return (a.card_order) - (b.card_order);
+        });
+        return cards
+    },
     addToCardsEvents: function(card) {
-        console.log(card)
         card.addEventListener('dragstart', function(event) {dom.handleDragStart(event, card)});
         card.addEventListener('dragenter', function(event) {dom.handleDragEnter(card)})
         card.addEventListener('dragover',  function(event) {dom.handleDragOver(event, card)});
@@ -203,7 +241,8 @@ let dom = {
         var allCards = document.querySelectorAll('.card');
         let newOrderValue = 1
         allCards.forEach(function(element) {
-            dataHandler.updateCardsOrder(element.id.replace('card', ''), newOrderValue, parseInt(dom.extractKeyWithValue(dom.statusesArray(), updatedStatus)), (parseInt(cardToUpdateStatus.replace('card', '')) -1), parseInt(boardId));
+            //dataHandler.updateCardsOrder(element.id.replace('card', ''), newOrderValue, parseInt(dom.extractKeyWithValue(dom.statusesArray(), updatedStatus)), (parseInt(cardToUpdateStatus.replace('card', '')) -1), parseInt(boardId));
+            logic.ajax('POST', '/update-order', 'cardId=' + element.id.replace('card', '') + '&newOrder=' + newOrderValue + '&status=' + parseInt(dom.extractKeyWithValue(dom.statusesArray(), updatedStatus)) + '&boardId=' + boardId + '&cardToUpdateStatus=' + parseInt(cardToUpdateStatus.replace('card', '')))
             newOrderValue++;
         })
     },
@@ -224,7 +263,8 @@ let dom = {
             element.append(card);
             let statusBoardCardArray = element.id.split("insideboard");
             statusBoardCardArray.push(card.id)
-            dataHandler.changedCardStatusAndBoard(dom.extractKeyWithValue(dom.statusesArray(), statusBoardCardArray[0]), statusBoardCardArray[1], statusBoardCardArray[2].replace('card', ''));
+            logic.ajax('POST', '/update-card-status-and-order', 'status=' + dom.extractKeyWithValue(dom.statusesArray(), statusBoardCardArray[0]) + '&boardId=' + statusBoardCardArray[1] + '&cardId=' + statusBoardCardArray[2].replace('card', ''))
+            //dataHandler.changedCardStatusAndBoard(dom.extractKeyWithValue(dom.statusesArray(), statusBoardCardArray[0]), statusBoardCardArray[1], statusBoardCardArray[2].replace('card', ''));
         }
     },
     extractKeyWithValue: function(obj, value) {

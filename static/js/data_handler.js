@@ -41,9 +41,7 @@ let dataHandler = {
         // the cards are retrieved and then the callback function is called with the cards
         cards = []
         for (var index = 0; index < dataHandler._data.cards.length; index++) {
-            if (dataHandler._data.cards[index].board_id === boardId) {
-                cards.push(dataHandler._data.cards[index])
-            }
+            cards.push(dataHandler._data.cards[index])
         }
         cards.sort(function(a, b) {
             return (a.order) - (b.order);
